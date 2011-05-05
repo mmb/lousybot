@@ -1,12 +1,12 @@
 var serverHost = '127.0.0.1',
-serverPort = 6668,
-serverPass = 'snails68Ibo',
-botNick = 'lousybot',
-joinChannels = [ '#test' ],
-pluginDir = './plugins';
+    serverPort = 6668,
+    serverPass = '*',
+    botNick = 'lousybot',
+    joinChannels = [ '#test' ],
+    pluginDir = './plugins',
 
-fs = require('fs');
-net = require('net');
+    fs = require('fs'),
+    net = require('net');
 
 function formatIrcMessage(command, text) {
     return command + ' ' + text + '\r\n';
@@ -15,13 +15,12 @@ function formatIrcMessage(command, text) {
 function parseIrcMessage(s) {
     console.log('parse ' + s);
 
-    var match = s.match(/(?::(.+?) )?(.+?) (.*)\r\n/);
-
-    parsed = {
-	prefix  : match[1],
-	command : match[2],
-	params  : match[3].split(' ')
-    };
+    var match = s.match(/(?::(.+?) )?(.+?) (.*)\r\n/),
+        parsed = {
+            prefix  : match[1],
+            command : match[2],
+            params  : match[3].split(' ')
+        };
 
     console.log(parsed);
 
@@ -30,19 +29,19 @@ function parseIrcMessage(s) {
 
 function loadPlugins(path) {
     var exp,
-    plugin,
-    pluginPath;
+        plugin,
+        pluginPath;
 
     fs.readdirSync(path).forEach(function(file) {
         if (file.match(/\.js$/)) {
-	    pluginPath = path + '/' + file;
-	    console.log('require ' + pluginPath);
-	    plugin = require(pluginPath);
+            pluginPath = path + '/' + file;
+            console.log('require ' + pluginPath);
+            plugin = require(pluginPath);
 
-	    for (exp in plugin) {
-		conn.addListener(exp, plugin[exp]);
-	    }
-	}
+            for (exp in plugin) {
+                conn.addListener(exp, plugin[exp]);
+            }
+        }
     });
 }
 
@@ -73,7 +72,7 @@ conn.addListener('data', function(buffer) {
     this.messageSoFar += buffer.toString();
 
     if (this.messageSoFar.match(/\r\n$/)) {
-	message = parseIrcMessage(this.messageSoFar.slice(0));
+        message = parseIrcMessage(this.messageSoFar.slice(0));
         this.emit(message.command, message);
         this.messageSoFar = '';
     }
@@ -86,7 +85,7 @@ conn.addListener('001', function() {
     var connection = this;
 
     joinChannels.forEach(function(channel) {
-	connection.sendMessage('JOIN', channel);
+        connection.sendMessage('JOIN', channel);
     });
 });
 
@@ -101,15 +100,15 @@ conn.addListener('PRIVMSG', function(m) {
     var hostmaskMatch = m.prefix.match(/(.+)!(.+)@(.+)/);
 
     if (hostmaskMatch) {
-	m.from = {
-	    nick : hostmaskMatch[1],
-	    user : hostmaskMatch[2],
-	    host : hostmaskMatch[3]
-	};
+        m.from = {
+            nick : hostmaskMatch[1],
+            user : hostmaskMatch[2],
+            host : hostmaskMatch[3]
+        };
     }
 
     if (m.to.match(/^#/)) {
-	m.channel = m.to;
+        m.channel = m.to;
         this.emit('channelMessage', m);
     } else {
         this.emit('privateMessage', m);
