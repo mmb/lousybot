@@ -5,17 +5,19 @@ var serverHost = '127.0.0.1',
     joinChannels = [ '#test' ],
     pluginDir = './plugins',
 
+    IRC_MESSAGE_END = '\r\n',
+
     fs = require('fs'),
     net = require('net');
 
 function formatIrcMessage(command, text) {
-    return command + ' ' + text + '\r\n';
+    return command + ' ' + text + IRC_MESSAGE_END;
 }
 
 function parseIrcMessage(s) {
     console.log('parse ' + s);
 
-    var match = s.match(/(?::(.+?) )?(.+?) (.*)\r\n/),
+    var match = s.match(/(?::(.+?) )?(.+?) (.*)/),
         parsed = {
             prefix  : match[1],
             command : match[2],
@@ -32,7 +34,7 @@ function loadPlugins(path) {
         plugin,
         pluginPath;
 
-    fs.readdirSync(path).forEach(function(file) {
+    fs.readdirSync(path).forEach(function (file) {
         if (file.match(/\.js$/)) {
             pluginPath = path + '/' + file;
             console.log('require ' + pluginPath);
@@ -46,54 +48,60 @@ function loadPlugins(path) {
 }
 
 var conn = net.createConnection(serverPort, host=serverHost);
-conn.messageSoFar = '';
+conn.messageBuffer = '';
 
-conn.sendMessage = function(command, text) {
+conn.sendMessage = function (command, text) {
     var formatted = formatIrcMessage(command, text);
 
     console.log('send ' + formatted);
     this.write(formatted);
 };
 
-conn.privmsg = function(to, message) {
+conn.privmsg = function (to, message) {
     this.sendMessage('PRIVMSG', to + ' :' + message);
 };
 
-conn.addListener('connect', function() {
+conn.addListener('connect', function () {
     this.sendMessage('PASS', serverPass);
     this.sendMessage('NICK', botNick);
     this.sendMessage('USER', botNick + ' * * ' + botNick);
 });
 
-conn.addListener('data', function(buffer) {
-    var message;
+conn.addListener('data', function (buffer) {
+    var connection;
 
     console.log('receive ' + buffer.toString());
-    this.messageSoFar += buffer.toString();
+    this.messageBuffer += buffer.toString();
 
-    if (this.messageSoFar.match(/\r\n$/)) {
-        message = parseIrcMessage(this.messageSoFar.slice(0));
-        this.emit(message.command, message);
-        this.messageSoFar = '';
+    if (this.messageBuffer.match(new RegExp(IRC_MESSAGE_END + '$'))) {
+        connection = this;
+        this.messageBuffer.split(IRC_MESSAGE_END).forEach(function (message) {
+            var parsedMessage;
+            if (!(message === '')) {
+                parsedMessage = parseIrcMessage(message);
+                connection.emit(parsedMessage.command, parsedMessage);
+            }
+        });
+        this.messageBuffer = '';
     }
 });
 
 // IRC command listeners
 
 // welcome
-conn.addListener('001', function() {
+conn.addListener('001', function () {
     var connection = this;
 
-    joinChannels.forEach(function(channel) {
+    joinChannels.forEach(function (channel) {
         connection.sendMessage('JOIN', channel);
     });
 });
 
-conn.addListener('PING', function(m) {
+conn.addListener('PING', function (m) {
     this.sendMessage('PONG', m.params[0]);
 });
 
-conn.addListener('PRIVMSG', function(m) {
+conn.addListener('PRIVMSG', function (m) {
     m.to = m.params[0];
     m.text = m.params.slice(1).join(' ').substr(1);
 
