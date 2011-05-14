@@ -8,7 +8,8 @@ var serverHost = '127.0.0.1',
     IRC_MESSAGE_END = '\r\n',
 
     fs = require('fs'),
-    net = require('net');
+    net = require('net'),
+    spawn = require('child_process').spawn;
 
 function formatIrcMessage(command, text) {
     return command + ' ' + text + IRC_MESSAGE_END;
@@ -85,6 +86,22 @@ conn.addListener('data', function (buffer) {
         this.messageBuffer = '';
     }
 });
+
+// spawn a child process and call lineCallback for each line of its stdout
+conn.spawn = function (command, args, lineCallback) {
+    var child = spawn(command, args),
+        buffer = '',
+        lastLine,
+        lines;
+
+    child.stdout.on('data', function (data) {
+        lines = (buffer + data).split('\n');
+        buffer = lines.pop();
+        lines.forEach(lineCallback);
+    });
+
+    return child;
+};
 
 // IRC command listeners
 
