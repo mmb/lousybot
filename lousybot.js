@@ -91,7 +91,6 @@ conn.addListener('data', function (buffer) {
 conn.spawn = function (command, args, lineCallback) {
     var child = spawn(command, args),
         buffer = '',
-        lastLine,
         lines;
 
     child.stdout.on('data', function (data) {
