@@ -1,3 +1,9 @@
 IRC bot written in node.js.
 
-First node.js project use at own risk.
+The goal for this bot is to make it easy to write plugins that are thin
+wrappers around forked child processes that communicate with IRC through UNIX
+standard streams (stdin, stdout, stderr). This allows plugins to use any
+existing UNIX command-line tool or language instead of reinventing the wheel.
+
+This bot has been developed on a private server with non-malicious users. Use
+it in the wild on IRC at your own risk.
