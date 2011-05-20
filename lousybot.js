@@ -62,6 +62,7 @@ function loadPlugins(path) {
 }
 
 var conn = net.createConnection(serverPort, host=serverHost);
+conn.botNick = botNick;
 conn.messageBuffer = '';
 
 conn.sendMessage = function (command, text) {
