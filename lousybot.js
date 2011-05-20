@@ -23,7 +23,20 @@ function parseIrcMessage(s) {
             prefix  : match[1],
             command : match[2],
             params  : match[3].split(' ')
-        };
+        },
+        hostmaskMatch;
+      
+    if (parsed.prefix !== undefined) {
+        hostmaskMatch = parsed.prefix.match(/(.+)!(.+)@(.+)/);
+
+        if (hostmaskMatch) {
+            parsed.from = {
+                nick : hostmaskMatch[1],
+                user : hostmaskMatch[2],
+                host : hostmaskMatch[3]
+            };
+        }
+    }
 
     console.log(parsed);
 
@@ -78,7 +91,7 @@ conn.addListener('data', function (buffer) {
         connection = this;
         this.messageBuffer.split(IRC_MESSAGE_END).forEach(function (message) {
             var parsedMessage;
-            if (!(message === '')) {
+            if (message !== '') {
                 parsedMessage = parseIrcMessage(message);
                 connection.emit(parsedMessage.command, parsedMessage);
             }
@@ -120,16 +133,6 @@ conn.addListener('PING', function (m) {
 conn.addListener('PRIVMSG', function (m) {
     m.to = m.params[0];
     m.text = m.params.slice(1).join(' ').substr(1);
-
-    var hostmaskMatch = m.prefix.match(/(.+)!(.+)@(.+)/);
-
-    if (hostmaskMatch) {
-        m.from = {
-            nick : hostmaskMatch[1],
-            user : hostmaskMatch[2],
-            host : hostmaskMatch[3]
-        };
-    }
 
     if (m.to.match(/^#/)) {
         m.channel = m.to;
