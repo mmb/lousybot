@@ -1,11 +1,12 @@
 // change the bot's nick: !botnick newnick
 
 function botnick(m) {
-    if (m.text.match(/^!botnick /)) {
-        var newNick = m.text.substr(9);
-
-        this.sendMessage('NICK', newNick);
-        this.botNick = newNick;
+    if (m.botCommand === 'botnick') {
+        if ((m.botCommandArgs !== undefined) &&
+            (m.botCommandArgs.match(/[^\s]/))) {
+            this.sendMessage('NICK', m.botCommandArgs);
+            this.botNick = m.botCommandArgs;
+        }
     }
 }
 

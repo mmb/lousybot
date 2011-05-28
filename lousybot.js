@@ -4,6 +4,7 @@ var serverHost = '127.0.0.1',
     botNick = 'lousybot',
     joinChannels = [ '#test' ],
     pluginDir = './plugins',
+    commandPrefix = '!',
 
     IRC_MESSAGE_END = '\r\n',
 
@@ -59,6 +60,28 @@ function loadPlugins(path) {
             }
         }
     });
+}
+
+function parseBotCommand(s) {
+    var argSep,
+        command,
+        result = {
+            botCommand : undefined,
+            botCommandArgs : undefined
+        };
+
+    if (s.substr(0, commandPrefix.length) === commandPrefix) {
+        command = s.substr(commandPrefix.length);
+        argSep = command.indexOf(' ');
+        if (argSep !== -1) {
+            result.botCommand = command.substr(0, argSep),
+            result.botCommandArgs = command.substr(argSep + 1, command.length);
+        } else {
+            result.botCommand = command;
+        }
+    }
+
+    return result;
 }
 
 var conn = net.createConnection(serverPort, host=serverHost);
@@ -132,8 +155,16 @@ conn.addListener('PING', function (m) {
 });
 
 conn.addListener('PRIVMSG', function (m) {
+    var botCommand,
+        x;
+
     m.to = m.params[0];
     m.text = m.params.slice(1).join(' ').substr(1);
+
+    botCommand = parseBotCommand(m.text);
+    for (x in botCommand) {
+        m[x] = botCommand[x];
+    }
 
     if (m.to.match(/^#/)) {
         m.channel = m.to;

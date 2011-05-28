@@ -1,5 +1,5 @@
 function exit(m) {
-    if (m.text === '!exit') {
+    if (m.botCommand === 'exit') {
         process.exit(0);
     }
 }

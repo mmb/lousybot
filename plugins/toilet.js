@@ -1,7 +1,7 @@
 exports.channelMessage = function (m) {
-    if (m.text.match(/^!toilet /)) {
+    if ((m.botCommand === 'toilet') && (m.botCommandArgs !== undefined)) {
         var conn = this,
-        child;
+            child;
 
         child = this.spawn('toilet', ['-f', 'smslant', '--irc'], function (line) {
             if (line.match(/[^\s]/)) {
@@ -9,7 +9,7 @@ exports.channelMessage = function (m) {
             }
         });
 
-        child.stdin.write(m.text.substr(8));
+        child.stdin.write(m.botCommandArgs);
         child.stdin.end();
     }
 };
