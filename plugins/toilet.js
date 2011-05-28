@@ -1,8 +1,8 @@
 exports.channelMessage = function (m) {
-    if ((m.botCommand === 'toilet') && (m.botCommandArgs !== undefined)) {
-        var conn = this,
-            child;
+    var conn = this,
+        child;
 
+    if ((m.botCommand === 'toilet') && (m.botCommandArgs !== undefined)) {
         child = this.spawn('toilet', ['-f', 'smslant', '--irc'], function (line) {
             if (line.match(/[^\s]/)) {
                 conn.privmsg(m.to, line);
