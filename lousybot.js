@@ -66,8 +66,8 @@ function parseBotCommand(s) {
     var argSep,
         command,
         result = {
-            botCommand : undefined,
-            botCommandArgs : undefined
+            botCommand : '',
+            botCommandArgs : '',
         };
 
     if (s.substr(0, commandPrefix.length) === commandPrefix) {

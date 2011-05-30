@@ -6,7 +6,7 @@ exports.privateMessage = function (m) {
         dest,
         test;
 
-    if ((m.botCommand === 'puppet') && (m.botCommandArgs !== undefined)) {
+    if ((m.botCommand === 'puppet') && (m.botCommandArgs.match(/[^\s]/))) {
         argSep = m.botCommandArgs.indexOf(' ');
         dest = m.botCommandArgs.substr(0, argSep);
         text = m.botCommandArgs.substr(argSep + 1, m.botCommandArgs.length);
