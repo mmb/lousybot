@@ -10,7 +10,7 @@ var serverHost = '127.0.0.1',
     httpHost = 'localhost',
 
     IRC_MESSAGE_END = '\r\n',
-    IRC_MAX_MESSAGE = 510,
+    IRC_MAX_MESSAGE = 417,
 
     fs = require('fs'),
     http = require('http'),
