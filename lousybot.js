@@ -5,12 +5,18 @@ var serverHost = '127.0.0.1',
     joinChannels = [ '#test' ],
     pluginDir = './plugins',
     commandPrefix = '!',
+    enableHttp = true,
+    httpPort = 31337,
+    httpHost = 'localhost',
 
     IRC_MESSAGE_END = '\r\n',
 
     fs = require('fs'),
+    http = require('http'),
     net = require('net'),
-    spawn = require('child_process').spawn;
+    queryString = require('querystring'),
+    spawn = require('child_process').spawn,
+    url = require('url');
 
 function formatIrcMessage(command, text) {
     return command + ' ' + text + IRC_MESSAGE_END;
@@ -67,14 +73,14 @@ function parseBotCommand(s) {
         command,
         result = {
             botCommand : '',
-            botCommandArgs : '',
+            botCommandArgs : ''
         };
 
     if (s.substr(0, commandPrefix.length) === commandPrefix) {
         command = s.substr(commandPrefix.length);
         argSep = command.indexOf(' ');
         if (argSep !== -1) {
-            result.botCommand = command.substr(0, argSep),
+            result.botCommand = command.substr(0, argSep);
             result.botCommandArgs = command.substr(argSep + 1, command.length);
         } else {
             result.botCommand = command;
@@ -175,3 +181,23 @@ conn.addListener('PRIVMSG', function (m) {
 });
 
 loadPlugins(pluginDir);
+
+if (enableHttp) {
+    http.createServer(function (req, resp) {
+        var query,
+            urlParsed;
+
+        urlParsed = url.parse(req.url);
+
+        console.log(req.method + ' ' + urlParsed.href);
+
+        query = queryString.parse(urlParsed.query);
+
+        if (query.to && query.message) {
+            conn.privmsg(query.to, query.message);
+        }
+
+        resp.writeHead(200, {  'Content-Type' : 'text/html' });
+        resp.end(conn.botNick + ' <form method="get" action=""><input type="text" name="to" /><input type="text" name="message" /><input type="submit" /></form>');
+    }).listen(httpPort, httpHost);
+}
