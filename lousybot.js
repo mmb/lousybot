@@ -91,6 +91,25 @@ function parseBotCommand(s) {
     return result;
 }
 
+// divide a string into parts, each a maximum of partSize length
+function partString(s, partSize) {
+    var numParts = Math.floor(s.length / partSize),
+        i,
+        start,
+        result = [];
+
+    if (s.length % partSize !== 0) {
+        numParts += 1;
+    }
+
+    for (i = 0; i < numParts; i++) {
+        start = i * partSize;
+        result.push(s.slice(start, start + partSize));
+    }
+
+    return result;
+}
+
 var conn = net.createConnection(serverPort, host=serverHost);
 conn.botNick = botNick;
 conn.messageBuffer = '';
@@ -104,16 +123,14 @@ conn.sendMessage = function (command, text) {
 
 conn.privmsg = function (to, message) {
     var prefixLen = ('PRIVMSG ' + to + ' :').length,
-        partLen = IRC_MAX_MESSAGE - prefixLen,
-        numParts = Math.floor(message.length / partLen),
-        i;
-    if (message.length % partLen !== 0) {
-        numParts += 1;
-    }
+        partSize = IRC_MAX_MESSAGE - prefixLen,
+        messageParts,
+        i,
+        messagePart;
 
-    for (i = 0; i < numParts; i++) {
-        this.sendMessage('PRIVMSG',
-            to + ' :' + message.slice(i * partLen, i * partLen + partLen));
+    messageParts = partString(message, partSize);
+    for (i = 0; i < messageParts.length; i++) {
+        this.sendMessage('PRIVMSG', to + ' :' + messageParts[i]);
     }
 };
 
