@@ -10,6 +10,7 @@ var serverHost = '127.0.0.1',
     httpHost = 'localhost',
 
     IRC_MESSAGE_END = '\r\n',
+    IRC_MAX_MESSAGE = 510,
 
     fs = require('fs'),
     http = require('http'),
@@ -102,7 +103,18 @@ conn.sendMessage = function (command, text) {
 };
 
 conn.privmsg = function (to, message) {
-    this.sendMessage('PRIVMSG', to + ' :' + message);
+    var prefixLen = ('PRIVMSG ' + to + ' :').length,
+        partLen = IRC_MAX_MESSAGE - prefixLen,
+        numParts = Math.floor(message.length / partLen),
+        i;
+    if (message.length % partLen !== 0) {
+        numParts += 1;
+    }
+
+    for (i = 0; i < numParts; i++) {
+        this.sendMessage('PRIVMSG',
+            to + ' :' + message.slice(i * partLen, i * partLen + partLen));
+    }
 };
 
 conn.addListener('connect', function () {
