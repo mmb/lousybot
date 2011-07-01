@@ -17,7 +17,13 @@ var serverHost = '127.0.0.1',
     net = require('net'),
     queryString = require('querystring'),
     spawn = require('child_process').spawn,
-    url = require('url');
+    url = require('url'),
+
+    couchDbHost = '127.0.0.1',
+    couchDbPort = 5984,
+    cradle,
+    dbConnection,
+    db;
 
 function formatIrcMessage(command, text) {
     return command + ' ' + text + IRC_MESSAGE_END;
@@ -208,6 +214,24 @@ conn.addListener('PRIVMSG', function (m) {
         this.emit('privateMessage', m);
     }
 });
+
+if (couchDbHost && couchDbPort) {
+    cradle = require('cradle');
+    dbConnection = new cradle.Connection(couchDbHost, couchDbPort);
+    conn.db = dbConnection.database('lousybot');
+    conn.db.exists(function (err, exists) {
+        if (err) {
+            throw err;
+        } else {
+            console.log('connected to couchdb ' + couchDbHost + ':' +
+                couchDbPort);
+            if (!exists) {
+                conn.db.create();
+                console.log('database created');
+            }
+        }
+    });
+}
 
 loadPlugins(pluginDir);
 
