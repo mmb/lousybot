@@ -1,10 +1,10 @@
 // store and recall key/value pairs in CouchDB
 //
-// To store, tell bot in channel or private message: k = v
+// To store, tell bot in channel or private message: !k=v
 // To retrieve: k?
 
-var lookupRe = /\s*(.+?)\s*\?+\s*$/,
-    storeRe = /\s*(.+?)\s*=\s*(.+)\s*/;
+var lookupRe = /!?\s*(.+?)\s*\?+\s*$/,
+    storeRe = /!\s*(.+?)\s*=\s*(.+)\s*/;
 
 function encodeKey(key) {
     return 'remember.' + encodeURIComponent(key);
@@ -12,7 +12,7 @@ function encodeKey(key) {
 
 function parseMessage(m, db, storedCallback, foundCallback) {
     var lookupMatch = m.text.match(lookupRe),
-        storeMatch;
+        storeMatch = m.text.match(storeRe);
 
     if (lookupMatch) {
         db.get(encodeKey(lookupMatch[1]),
@@ -23,19 +23,16 @@ function parseMessage(m, db, storedCallback, foundCallback) {
                     storedCallback(lookupMatch[1] + " is " + doc.def);
                 }
             });
-    } else {
-        storeMatch = m.text.match(storeRe);
-
-        if (storeMatch) {
-            db.save(encodeKey(storeMatch[1]), {
-                def: storeMatch[2],
-                from: m.from,
-                time: new Date(),
-                to: m.to
-            });
-            foundCallback("I will remember that '" + storeMatch[1] + "' is '" +
-                storeMatch[2] + "'");
-        }
+    }
+    if (storeMatch) {
+        db.save(encodeKey(storeMatch[1]), {
+            def: storeMatch[2],
+            from: m.from,
+            time: new Date(),
+            to: m.to
+        });
+        foundCallback("I will remember that '" + storeMatch[1] + "' is '" +
+            storeMatch[2] + "'");
     }
 }
 
