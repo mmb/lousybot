@@ -6,7 +6,7 @@ var serverHost = '127.0.0.1',
     pluginDir = './plugins',
     commandPrefix = '!',
     enableHttp = true,
-    httpPort = 31337,
+    httpPort = 8078,
     httpHost = 'localhost',
 
     IRC_MESSAGE_END = '\r\n',
