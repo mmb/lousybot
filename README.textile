@@ -1,13 +1,11 @@
 IRC bot written in node.js.
 
-The goal for this bot is to make it easy to write plugins that are thin
-wrappers around forked child processes that communicate with IRC through UNIX
-standard streams (stdin, stdout, stderr). This allows plugins to use any
-existing UNIX command-line tool or language instead of reinventing the wheel.
-
-The bot has an HTTP interface that can be used to send messages to users or
-channels by GETing a url. This is useful for writing scripts to alert on
-something.
+* supports plugins
+* plugins can use CouchDB for storage
+* HTTP and AMQP interface plugins for sending messages to users and channel from scripts
+* easy to write plugins that wrap forked child processes to use existing command-line tools and scripts
 
 This bot has been developed on a private server with non-malicious users. Use
 it in the wild on IRC at your own risk.
+
+Questions and comments: "matthewm@boedicker.org":mailto:matthewm@boedicker.org
