@@ -5,19 +5,13 @@ var serverHost = '127.0.0.1',
     joinChannels = [ '#test' ],
     pluginDir = './plugins',
     commandPrefix = '!',
-    enableHttp = true,
-    httpPort = 8078,
-    httpHost = 'localhost',
 
     IRC_MESSAGE_END = '\r\n',
     IRC_MAX_MESSAGE = 417,
 
     fs = require('fs'),
-    http = require('http'),
     net = require('net'),
-    queryString = require('querystring'),
     spawn = require('child_process').spawn,
-    url = require('url'),
 
     couchDbHost = '127.0.0.1',
     couchDbPort = 5984,
@@ -236,23 +230,3 @@ if (couchDbHost && couchDbPort) {
 }
 
 loadPlugins(pluginDir);
-
-if (enableHttp) {
-    http.createServer(function (req, resp) {
-        var query,
-            urlParsed;
-
-        urlParsed = url.parse(req.url);
-
-        console.log(req.method + ' ' + urlParsed.href);
-
-        query = queryString.parse(urlParsed.query);
-
-        if (query.to && query.message) {
-            conn.privmsg(query.to, query.message);
-        }
-
-        resp.writeHead(200, {  'Content-Type' : 'text/html' });
-        resp.end(conn.botNick + ' <form method="get" action=""><input type="text" name="to" /><input type="text" name="message" /><input type="submit" /></form>');
-    }).listen(httpPort, httpHost);
-}
