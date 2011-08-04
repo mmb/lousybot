@@ -189,6 +189,8 @@ conn.addListener('001', function () {
     joinChannels.forEach(function (channel) {
         connection.sendMessage('JOIN', channel);
     });
+
+    connection.emit('joinsSent');
 });
 
 conn.addListener('PING', function (m) {
