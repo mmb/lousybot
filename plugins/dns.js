@@ -5,6 +5,10 @@ var dns = require('dns'),
     hostnameRe = /([a-z\d]([a-z\d\-]{0,61}[a-z\d])?\.)+[a-z]+/gi,
     ipRe = /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/g;
 
+function cmp(a, b) {
+    return a > b ? 1 : a < b ? -1 : 0;
+}
+
 function formatA(recs) {
     return 'A:' + recs.join(', ');
 }
@@ -18,11 +22,17 @@ function formatCnames(cnames) {
 function formatMx(mx) {
     var result = [];
 
+    mx.sort(function (a, b) {
+        var result = cmp(a.priority, b.priority);
+        if (result === 0) {
+            result = cmp(a.exchange, b.exchange);
+        }
+
+        return result;
+    });
     mx.forEach(function (rec) {
         result.push(rec.exchange);
     });
-
-    result.sort();
 
     return 'MX:' + result.join(', ');
 }
