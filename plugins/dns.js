@@ -2,7 +2,7 @@
 // lookup dns information about them
 
 var dns = require('dns'),
-    hostnameRe = /([a-z\d]([a-z\d\-]{0,61}[a-z\d])?\.)+[a-z]+/gi,
+    hostnameRe = /([a-z\d_]([a-z\d\-]{0,61}[a-z\d])?\.)+[a-z]+/gi,
     ipRe = /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/g;
 
 function cmp(a, b) {
@@ -49,11 +49,32 @@ function formatReverse(ip, hostnames) {
     return ip + '->[' + hostnames.join(', ') + ']';
 }
 
+function formatSrv(srvs) {
+    var result = [];
+
+    srvs.sort(function (a, b) {
+        var result = cmp(a.priority, b.priority);
+        if (result === 0) {
+            result = cmp(a.name, b.name);
+        }
+        if (result === 0) {
+            result = cmp(a.port, b.port);
+        }
+
+        return result;
+    });
+    srvs.forEach(function (rec) {
+        result.push(rec.name + ':' + rec.port);
+    });
+
+    return 'SRV:' + result.join(', ');
+}
+
 function infoHostnames(s, callback) {
     (s.match(hostnameRe) || []).forEach(function (hostname) {
         var doneCount = 0,
             results = [],
-            numParts = 4;
+            numParts = 5;
 
         dns.resolve4(hostname, function (err, ips) {
             var ipsDoneCount = 0,
@@ -61,6 +82,7 @@ function infoHostnames(s, callback) {
 
             if (err) {
                 console.log(err);
+                doneCount += 1;
             } else {
                 ips.forEach(function (ip) {
                     dns.reverse(ip, function (err, hostnames) {
@@ -123,6 +145,20 @@ function infoHostnames(s, callback) {
             } else {
                 if (ns.length > 0) {
                     results.push(formatNs(ns));
+                }
+            }
+            if (doneCount === numParts) {
+                callback(hostname + ' ' + results.join(' ; '));
+            }
+        });
+
+        dns.resolveSrv(hostname, function (err, srv) {
+            doneCount += 1;
+            if (err) {
+                console.log(err);
+            } else {
+                if (srv.length > 0) {
+                    results.push(formatSrv(srv));
                 }
             }
             if (doneCount === numParts) {
