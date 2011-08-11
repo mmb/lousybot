@@ -30,7 +30,7 @@ function formatMx(mx) {
 
         return result;
     });
-    mx.forEach(function (rec) {
+    mx.slice(0, 3).forEach(function (rec) {
         result.push(rec.exchange);
     });
 
@@ -40,7 +40,7 @@ function formatMx(mx) {
 function formatNs(nameservers) {
     nameservers.sort();
 
-    return 'NS:' + nameservers.join(', ');
+    return 'NS:' + nameservers.slice(0, 3).join(', ');
 }
 
 function formatReverse(ip, hostnames) {
