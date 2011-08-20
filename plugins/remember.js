@@ -20,7 +20,7 @@ function parseMessage(m, db, storedCallback, foundCallback) {
                 if (err) {
                     console.log(err);
                 } else {
-                    storedCallback(lookupMatch[1] + " is " + doc.def);
+                    foundCallback(lookupMatch[1] + " is " + doc.def);
                 }
             });
     }
@@ -31,7 +31,7 @@ function parseMessage(m, db, storedCallback, foundCallback) {
             time: new Date(),
             to: m.to
         });
-        foundCallback("I will remember that '" + storeMatch[1] + "' is '" +
+        storedCallback("I will remember that '" + storeMatch[1] + "' is '" +
             storeMatch[2] + "'");
     }
 }
