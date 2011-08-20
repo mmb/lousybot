@@ -70,6 +70,12 @@ function formatSrv(srvs) {
     return 'SRV:' + result.join(', ');
 }
 
+function checkDone(doneCount, numParts, hostname, results, callback) {
+    if ((doneCount === numParts) && (results.length > 0)) {
+        callback(hostname + ' ' + results.join(' ; '));
+    }
+}
+
 function infoHostnames(s, callback) {
     (s.match(hostnameRe) || []).forEach(function (hostname) {
         var doneCount = 0,
@@ -101,9 +107,8 @@ function infoHostnames(s, callback) {
                         if (ipsDoneCount === ips.length) {
                             results.push(formatA(ipResults));
                             doneCount += 1;
-                            if (doneCount === numParts) {
-                                callback(hostname + ' ' + results.join(' ; '));
-                            }
+                            checkDone(doneCount, numParts, hostname, results,
+                                callback);
                         }
                     });
                 });
@@ -119,9 +124,7 @@ function infoHostnames(s, callback) {
                     results.push(formatCnames(cnames));
                 }
             }
-            if (doneCount === numParts) {
-                callback(hostname + ' ' + results.join(' ; '));
-            }
+            checkDone(doneCount, numParts, hostname, results, callback);
         });
 
         dns.resolveMx(hostname, function (err, mx) {
@@ -133,9 +136,7 @@ function infoHostnames(s, callback) {
                     results.push(formatMx(mx));
                 }
             }
-            if (doneCount === numParts) {
-                callback(hostname + ' ' + results.join(' ; '));
-            }
+            checkDone(doneCount, numParts, hostname, results, callback);
         });
 
         dns.resolveNs(hostname, function (err, ns) {
@@ -147,9 +148,7 @@ function infoHostnames(s, callback) {
                     results.push(formatNs(ns));
                 }
             }
-            if (doneCount === numParts) {
-                callback(hostname + ' ' + results.join(' ; '));
-            }
+            checkDone(doneCount, numParts, hostname, results, callback);
         });
 
         dns.resolveSrv(hostname, function (err, srv) {
@@ -161,9 +160,7 @@ function infoHostnames(s, callback) {
                     results.push(formatSrv(srv));
                 }
             }
-            if (doneCount === numParts) {
-                callback(hostname + ' ' + results.join(' ; '));
-            }
+            checkDone(doneCount, numParts, hostname, results, callback);
         });
     });
 }
