@@ -3,8 +3,8 @@
 // To store, tell bot in channel or private message: !k=v
 // To retrieve: k?
 
-var lookupRe = /!?\s*(.+?)\s*\?+\s*$/,
-    storeRe = /!\s*(.+?)\s*=\s*(.+)\s*/;
+var lookupRe = /^!?\s*(.+?)\s*\?+\s*$/,
+    storeRe = /^!\s*(.+?)\s*=\s*(.+)\s*$/;
 
 function encodeKey(key) {
     return 'remember.' + encodeURIComponent(key);
