@@ -1,5 +1,5 @@
-// when hostnames or ip addresses are seen in channels or private messages
-// lookup dns information about them
+// look up DNS information about hostnames or IP addresses
+// Usage: !dns [ip|hostname]...
 
 var dns = require('dns'),
     hostnameRe = /([a-z\d_]([a-z\d\-]{0,61}[a-z\d])?\.)+[a-z]+/gi,
@@ -182,23 +182,27 @@ function infoIps(s, callback) {
 exports.privateMessage = function (m) {
     var conn = this;
 
-    infoHostnames(m.text, function (resp) {
-        conn.privmsg(m.from.nick, resp);
-    });
+    if (m.botCommand === 'dns') {
+        infoHostnames(m.text, function (resp) {
+            conn.privmsg(m.from.nick, resp);
+        });
 
-    infoIps(m.text, function (resp) {
-        conn.privmsg(m.from.nick, resp);
-    });
+        infoIps(m.text, function (resp) {
+            conn.privmsg(m.from.nick, resp);
+        });
+    }
 };
 
 exports.channelMessage = function (m) {
     var conn = this;
 
-    infoHostnames(m.text, function (resp) {
-        conn.privmsg(m.to, resp);
-    });
+    if (m.botCommand === 'dns') {
+        infoHostnames(m.text, function (resp) {
+            conn.privmsg(m.to, resp);
+        });
 
-    infoIps(m.text, function (resp) {
-        conn.privmsg(m.to, resp);
-    });
+        infoIps(m.text, function (resp) {
+            conn.privmsg(m.to, resp);
+        });
+    }
 };
